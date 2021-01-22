@@ -1,3 +1,7 @@
+/* * {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+} */
+
 .App {
   text-align: center;
 }
@@ -35,4 +39,38 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.main {
+  margin-left: 250px;
+  /* Same as the width of the sidenav */
+  font-size: 28px;
+  /* Increased text to enable scrolling */
+  /* padding: 0px 10px; */
+}
+
+.breadcrumb {
+  padding: 10px 16px;
+  list-style: none;
+  background-color: #eed;
+}
+
+.breadcrumb-item {
+  display: inline;
+  font-size: 18px;
+}
+
+.breadcrumb li+li:before {
+  /* padding: 8px; */
+  color: black;
+  content: ">>";
+}
+
+.breadcrumb-item a {
+  color: #2e4053;
+  text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+  color: red;
 }

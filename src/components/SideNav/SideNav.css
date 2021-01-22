@@ -1,0 +1,41 @@
+.sidebar {
+  height: 100%;
+  width: 250px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+.menu {
+  padding: 0;
+  width: 100%;
+}
+
+.sidebar ul {
+  display: contents;
+}
+
+.sidebar ul li {
+  font-size: 16px;
+  list-style: none;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.sidebar ul li a {
+  text-decoration: none;
+  padding: 10px 30px;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 5px;
+}
+
+.active {
+  background: rgb(98, 218, 62);
+}

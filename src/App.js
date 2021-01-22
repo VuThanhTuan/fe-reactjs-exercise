@@ -1,25 +1,49 @@
-import logo from './logo.svg';
+/* eslint-disable max-len */
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prefer-stateless-function */
+/* eslint-disable jsx-a11y/anchor-is-valid */
+import React, { Component, lazy, Suspense } from 'react';
 import './App.css';
+import {
+  BrowserRouter as Router, Route, Switch, Link, NavLink,
+} from 'react-router-dom';
+import path from './constant/index';
+import SideBar from './components/SideNav/SideNav';
+import Home from './pages/product/home/Home';
+import Management from './pages/product/management/management';
+import ProductDetail from './pages/product/detail/detail';
+import UpdateProduct from './pages/product/update/update';
+import Loading from './components/loading/loading';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+// const ProductDetail = lazy(
+//   () => import('./pages/product/detail/detail'),
+// );
+// const Management = lazy(
+//   () => import('./pages/product/management/management'),
+// );
+class App extends Component {
+  render() {
+    return (
+      <Router>
+        <div>
+          <SideBar />
+          <div className="main">
+            <div className="row">
+              <Switch>
+                {/* {[path.path.HOME, '/'].map((p, index) => <Route exact path={p} component={Home} key={index} />)} */}
+                {/* <Route exact path={path.path.HOME} component={Home} /> */}
+                <Route exact path={[path.HOME, '/']} component={Home} />
+                <Route exact path={path.PRODUCT} component={Management} />
+                <Route path={path.DETAIL} component={ProductDetail} />
+                <Route path={path.UPDATE} component={UpdateProduct} />
+              </Switch>
+            </div>
+          </div>
+        </div>
+      </Router>
+    );
+  }
 }
 
 export default App;
