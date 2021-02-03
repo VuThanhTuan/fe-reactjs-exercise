@@ -32,8 +32,6 @@ class App extends Component {
           <div className="main">
             <div className="row">
               <Switch>
-                {/* {[path.path.HOME, '/'].map((p, index) => <Route exact path={p} component={Home} key={index} />)} */}
-                {/* <Route exact path={path.path.HOME} component={Home} /> */}
                 <Route exact path={[path.HOME, '/']} component={Home} />
                 <Route exact path={path.PRODUCT} component={Management} />
                 <Route path={`${path.DETAIL}/:id`} component={ProductDetail} />

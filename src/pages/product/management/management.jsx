@@ -1,9 +1,7 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/prop-types */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable no-unused-vars */
 import React, { Component, useEffect, useState } from 'react';
 import './management.css';
 import PropTypes from 'prop-types';
@@ -23,9 +21,7 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import {
-  Link, NavLink, Route, Switch, useHistory,
-} from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Formik, Form, useField } from 'formik';
@@ -144,7 +140,12 @@ const validationSchema = Yup.object().shape({
   description: Yup.string().max(500, 'Mô tả quá dài!').min(10, 'Mô tả quá ngắn'),
   typeId: Yup.string().required('Không được để trống loại sản phẩm'),
   categoryId: Yup.string().required('Không được để trống danh mục sản phẩm'),
-  file: Yup.mixed().required('Không được để trống ảnh đại diện sản phẩm'),
+  // file: Yup.mixed().required('Không được để trống ảnh đại diện sản phẩm'),
+  file: Yup.mixed()
+    .test('fileSize', 'Kích thước ảnh quá lớn!', (value) => value && value.size <= FILE_SIZE)
+    .test('fileType', 'Chỉ được gửi ảnh với kích thước nhỏ!', (value) => {
+      SUPPORTED_FORMATS.includes(value.type);
+    }),
 });
 const initialValues = {
   productName: '',
@@ -155,6 +156,7 @@ const initialValues = {
   file: '',
 };
 // text area component
+// eslint-disable-next-line react/prop-types
 const MyTextArea = ({ label, ...props }) => {
   // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
   // which we can spread on <input> and also replace ErrorMessage entirely.
@@ -169,6 +171,7 @@ const MyTextArea = ({ label, ...props }) => {
   }
   return (
     <>
+      {/* eslint-disable-next-line react/prop-types */}
       <label className="text-area-label" htmlFor={props.id || props.name}>{label}</label>
       <textarea style={style} className="text-area" {...field} {...props} />
       {meta.touched && meta.error ? (

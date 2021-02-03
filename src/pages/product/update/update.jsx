@@ -1,14 +1,11 @@
 /* eslint-disable prefer-destructuring */
-/* eslint-disable max-len */
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable react/no-this-in-sfc */
 /* eslint-disable react/prop-types */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable no-unused-vars */
-/* eslint-disable arrow-body-style */
 import React, { Component, useEffect, useState } from 'react';
-import { NavLink, Link, useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import { emphasize, withStyles, makeStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
@@ -86,17 +83,9 @@ const MyTextArea = ({ label, ...props }) => {
     </>
   );
 };
-const initialValues = {
-  productName: '',
-  price: '',
-  typeId: '',
-  description: '',
-  categoryId: '',
-  avatar: '',
-  image: [],
-};
 const UpdateProduct = () => {
   const { id } = useParams();
+  const history = useHistory();
   const [product, setProduct] = useState();
   const [viewImage, setViewImage] = useState(false);
   const [viewImageSlide, setViewImageSlide] = useState({ index: '', isShow: false });
@@ -113,7 +102,6 @@ const UpdateProduct = () => {
   const [optionCategory, setOptionCategory] = useState([]);
   const [description, setDescription] = useState('');
   const [listImage, setListImage] = useState([null, null, null, null, null]);
-  const [deleteIndex, setDeleteIndex] = useState([]);
   const classes = useStyles();
   let disabled = true;
   if (typeId !== '') {
@@ -153,12 +141,12 @@ const UpdateProduct = () => {
       });
   }
   // get category by type product
-  async function getCategoryByTypeId() {
-    return API.getCategoryByType(typeId)
+  async function getCategoryByTypeId(idType) {
+    return API.getCategoryByType(idType)
       .then((res) => {
-        const { dataCate } = res;
+        const { data } = res;
         const ListCategory = [];
-        dataCate.data.forEach((item) => {
+        data.data.forEach((item) => {
           ListCategory.push({ label: item.name, value: item._id });
         });
         setOptionCategory(ListCategory);
@@ -170,6 +158,7 @@ const UpdateProduct = () => {
     return API.getByProductId(productId).then(
       (response) => {
         const { data } = response.data;
+        getCategoryByTypeId(data.typeId._id);
         setProduct({
           productName: data.productName,
           price: data.price,
@@ -195,6 +184,7 @@ const UpdateProduct = () => {
         setDescription(data.description);
       },
     ).catch((e) => {
+      history.push('/notfound');
     });
   }
   // submit data to update product
@@ -303,7 +293,6 @@ const UpdateProduct = () => {
   }, []);
   useEffect(() => {
     getTypeProducts();
-    getCategoryByTypeId();
   }, []);
   return (
     <div className={classes.root}>
@@ -392,7 +381,7 @@ const UpdateProduct = () => {
                         options={optionCategory}
                         fullWidth
                         padding="12px 0"
-                        disabled={disabled}
+                      // disabled={disabled}
                       />
                     </Grid>
                   </Grid>

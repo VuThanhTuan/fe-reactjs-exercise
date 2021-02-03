@@ -1,9 +1,6 @@
 /* eslint-disable arrow-body-style */
-/* eslint-disable max-len */
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/alt-text */
-/* eslint-disable jsx-a11y/anchor-is-valid */
-/* eslint-disable react/prefer-stateless-function */
 import React, {
   Component, useEffect, useState,
 } from 'react';
