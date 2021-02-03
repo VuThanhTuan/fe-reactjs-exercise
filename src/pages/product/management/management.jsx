@@ -24,7 +24,9 @@ import EditIcon from '@material-ui/icons/Edit';
 import { useHistory } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Formik, Form, useField } from 'formik';
+import {
+  Formik, Form, useField,
+} from 'formik';
 import * as Yup from 'yup';
 import { FormikTextField, FormikSelectField, TextField } from 'formik-material-fields';
 import Grid from '@material-ui/core/Grid';
@@ -140,12 +142,7 @@ const validationSchema = Yup.object().shape({
   description: Yup.string().max(500, 'Mô tả quá dài!').min(10, 'Mô tả quá ngắn'),
   typeId: Yup.string().required('Không được để trống loại sản phẩm'),
   categoryId: Yup.string().required('Không được để trống danh mục sản phẩm'),
-  // file: Yup.mixed().required('Không được để trống ảnh đại diện sản phẩm'),
-  file: Yup.mixed()
-    .test('fileSize', 'Kích thước ảnh quá lớn!', (value) => value && value.size <= FILE_SIZE)
-    .test('fileType', 'Chỉ được gửi ảnh với kích thước nhỏ!', (value) => {
-      SUPPORTED_FORMATS.includes(value.type);
-    }),
+  file: Yup.mixed().required('Không được để trống ảnh đại diện!'),
 });
 const initialValues = {
   productName: '',
@@ -252,10 +249,6 @@ const ProductManagement = () => {
 
       });
   }
-  // clear form data
-  async function clearForm() {
-    window.location.reload();
-  }
   // submit data to create product
   const onSubmit = () => {
     const formData = serialize(
@@ -287,6 +280,11 @@ const ProductManagement = () => {
         });
       });
   };
+  // clear form data
+  async function clearForm() {
+    setDescription('');
+    setAvatar(null);
+  }
   // delete a product
   async function deleteProduct(id) {
     Swal.fire({
@@ -409,7 +407,7 @@ const ProductManagement = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {products && products.map((productItem, index) => (
+                    {products && products?.map((productItem, index) => (
                       <TableRow key={productItem._id}>
                         <TableCell align="center">
                           {index + 1}
@@ -468,7 +466,7 @@ const ProductManagement = () => {
                 validationSchema={validationSchema}
                 onSubmit={onSubmit}
               >
-                {({ isValid, values }) => (
+                {({ isValid, values, resetForm }) => (
                   <Form autoComplete="off">
                     <FormikTextField
                       name="productName"
@@ -541,7 +539,7 @@ const ProductManagement = () => {
                       <Button className="btn-submit" color="primary" variant="contained" type="submit">
                         Thêm
                       </Button>
-                      <Button className="btn-submit" color="secondary" variant="contained" onClick={() => clearForm()}>
+                      <Button className="btn-submit" color="secondary" variant="contained" onClick={() => { resetForm(); clearForm(); }}>
                         Đặt lại
                       </Button>
                     </div>
