@@ -2,12 +2,15 @@
 /* eslint-disable react/jsx-no-undef */
 /* eslint-disable react/prefer-stateless-function */
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
-import { Component } from 'react';
+import React from 'react';
 import { emphasize, withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import { NavLink, Link } from 'react-router-dom';
 import HomeIcon from '@material-ui/icons/Home';
+import ListIcon from '@material-ui/icons/List';
+import ViewListIcon from '@material-ui/icons/ViewList';
 import './BreadCrumb.css';
+import { object } from 'yup/lib/locale';
 
 const StyledBreadcrumb = withStyles((theme) => ({
   root: {
@@ -28,19 +31,16 @@ const StyledBreadcrumb = withStyles((theme) => ({
 function handleClick(event) {
   event.preventDefault();
 }
-class BreadCrumb extends Component {
-  // eslint-disable-next-line no-useless-constructor
-  constructor(props) {
-    super(props);
-  }
-
+class BreadCrumb extends React.Component {
   render() {
+    // eslint-disable-next-line react/prop-types
+    const { name } = this.props;
     return (
       <Breadcrumbs aria-label="breadcrumb">
         <StyledBreadcrumb
           component="a"
           href="#"
-          label="Sản phẩm"
+          label={name}
           icon={<HomeIcon fontSize="small" />}
           onClick={handleClick}
         />
@@ -48,6 +48,7 @@ class BreadCrumb extends Component {
           component="a"
           href="#"
           label="Danh sách sản phẩm"
+          icon={<ViewListIcon fontSize="small" />}
           onClick={handleClick}
         />
       </Breadcrumbs>

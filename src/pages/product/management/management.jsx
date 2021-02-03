@@ -26,19 +26,22 @@ import EditIcon from '@material-ui/icons/Edit';
 import {
   Link, NavLink, Route, Switch, useHistory,
 } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Formik, Form, useField } from 'formik';
 import * as Yup from 'yup';
 import { FormikTextField, FormikSelectField, TextField } from 'formik-material-fields';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import PhotoCamera from '@material-ui/icons/PhotoCamera';
-import MyForm from '../../../components/form/form';
+import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
+import InsertPhotoOutlinedIcon from '@material-ui/icons/InsertPhotoOutlined';
+import Swal from 'sweetalert2';
+import { serialize } from 'object-to-formdata';
 import BreadCrumb from '../../../components/BreadCrumb/BreadCrumb';
-import ListProduct from '../../../components/table/table';
 import API from '../../../api/index';
-import path from '../../../constant/index';
 
+// style for child elements
 const useStyles = makeStyles((theme) => ({
   button: {
     display: 'block',
@@ -50,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
   },
   root: {
     flexGrow: 1,
-    padding: '20px 20px',
+    padding: '8px 20px',
   },
   paper: {
     padding: theme.spacing(2),
@@ -69,6 +72,7 @@ const useStyles2 = makeStyles({
     minWidth: 500,
   },
 });
+// pagination component
 function TablePaginationActions(props) {
   const classes = useStyles1();
   const theme = useTheme();
@@ -121,13 +125,26 @@ function TablePaginationActions(props) {
     </div>
   );
 }
+const FILE_SIZE = 1 * 1024 * 1024;
+const SUPPORTED_FORMATS = [
+  'image/jpg',
+  'image/jpeg',
+  'image/gif',
+  'image/png',
+];
+// validation form
 const validationSchema = Yup.object().shape({
-  productName: Yup.string().required().matches(/^[a-zA-Z0-9]*$/, 'Only letters and numbers are accepted'),
-  price: Yup.number().required().min(0),
-  description: Yup.string().required().max(255).min(10),
-  typeId: Yup.string().required(),
-  categoryId: Yup.string().required(),
-  avatar: Yup.string().required(),
+  productName: Yup.string().required('Không được để trống tên sản phẩm')
+    .min(5, 'Tên sản phẩm quá ngắn')
+    .max(20, 'Tên sản phẩm quá dài')
+    .trim(),
+  price: Yup.number('Nhập sai định dạng').typeError('Nhập sai định dạng')
+    .required('Không được để trống')
+    .min(0, 'Giá phải lớn hơn 0'),
+  description: Yup.string().max(500, 'Mô tả quá dài!').min(10, 'Mô tả quá ngắn'),
+  typeId: Yup.string().required('Không được để trống loại sản phẩm'),
+  categoryId: Yup.string().required('Không được để trống danh mục sản phẩm'),
+  file: Yup.mixed().required('Không được để trống ảnh đại diện sản phẩm'),
 });
 const initialValues = {
   productName: '',
@@ -135,8 +152,9 @@ const initialValues = {
   typeId: '',
   description: '',
   categoryId: '',
-  avatar: '',
+  file: '',
 };
+// text area component
 const MyTextArea = ({ label, ...props }) => {
   // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
   // which we can spread on <input> and also replace ErrorMessage entirely.
@@ -162,63 +180,215 @@ const MyTextArea = ({ label, ...props }) => {
 const ProductManagement = () => {
   const classes = useStyles();
   const classesTable = useStyles2();
-  const [products, setProducts] = useState('');
+  const [typeId, setType] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [products, setProducts] = useState();
+  const [optionType, setOptionType] = useState([]);
+  const [avatar, setAvatar] = useState(null);
+  const [description, setDescription] = useState('');
+  const [optionCategory, setOptionCategory] = useState([{ label: '', value: '' }]);
+  const [newProduct, setNewProduct] = useState(initialValues);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalItem, setTotalItem] = useState(0);
+  const [viewImage, setViewImage] = useState(false);
   const history = useHistory();
-
+  let disabled = true;
+  // style for image when have image
+  let style = {};
+  let styleButtonImage = {};
+  let styleDivUpload = {};
+  if (!avatar) {
+    style = {
+      display: 'none',
+    };
+    styleDivUpload = {
+      zIndex: '0',
+    };
+    styleButtonImage = {
+      opacity: '1',
+    };
+  }
+  // exit view avatar
+  async function exit() {
+    setViewImage(false);
+  }
+  // view avatar
+  async function view() {
+    setViewImage(true);
+  }
   TablePaginationActions.propTypes = {
     count: PropTypes.number.isRequired,
     onChangePage: PropTypes.func.isRequired,
     page: PropTypes.number.isRequired,
     rowsPerPage: PropTypes.number.isRequired,
   };
+  // get data products
   async function getProductData() {
-    return API.getAll()
+    return API.getAll(page, rowsPerPage)
       .then((response) => {
         const { data } = response;
-        setProducts(data.data);
+        setProducts(data.data.data);
+        setTotalItem(data.data.totalItem);
       })
       .catch((e) => {
       });
   }
+  // get all type product
+  async function getTypeProducts() {
+    return API.getAllType()
+      .then((response) => {
+        const { data } = response;
+        const ListType = [];
+        data.data.forEach((item, index) => {
+          ListType.push({ label: item.name, value: item._id });
+        });
+        setOptionType(ListType);
+      })
+      .catch((e) => {
+
+      });
+  }
+  // clear form data
+  async function clearForm() {
+    window.location.reload();
+  }
+  // submit data to create product
   const onSubmit = () => {
-
-  };
-
-  async function deleteProduct(id) {
-    return API.deleteProduct(id)
-      .then((res) => {
+    const formData = serialize(
+      newProduct,
+    );
+    API.createNewProduct(formData)
+      .then((response) => {
+        toast.success('Tạo thành công sản phẩm!', {
+          position: 'top-right',
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
         getProductData();
       })
-      .catch((e) => {
+      .catch((error) => {
+        const message = error.response.data.message === 'this name product has been using' ? 'Tên sản phẩm đã được sử dụng' : 'Xảy ra lỗi khi tạo sản phẩm';
+        toast.error(message, {
+          position: 'top-right',
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined,
+        });
       });
+  };
+  // delete a product
+  async function deleteProduct(id) {
+    Swal.fire({
+      title: 'Bạn có chắc chắn muốn xóa không?',
+      // text: 'Bạn sẽ không thể hoàn tác!',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Xóa!',
+      cancelButtonText: 'Hủy',
+      // eslint-disable-next-line consistent-return
+    }).then((result) => {
+      if (result.isConfirmed) {
+        API.deleteProduct(id)
+          .then((res) => {
+            Swal.fire(
+              'Xóa thành công sản phẩm!',
+            );
+            getProductData();
+            if (products.length === 1 && page >= 1) {
+              setPage(page - 1);
+            }
+          })
+          .catch((e) => {
+          });
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire(
+          'Sản phẩm được giữ',
+        );
+      }
+    });
   }
-
+  // navigate to page update product
   async function updateProduct(id) {
     history.push(`/product/${id}`);
   }
-
-  const rows = !products ? [] : products.sort((a, b) => (a.createAt < b.createAt ? -1 : 1));
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
+  // handle change page at pagination
   const handleChangePage = (event, newPage) => {
+    setRowsPerPage(rowsPerPage);
     setPage(newPage);
   };
-
+  // handle change number of record in pagination
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+  // change type product in form
+  const handleChangeType = (event) => {
+    setType(event.target.value);
+    setNewProduct({ ...newProduct, [event.target.name]: event.target.value });
+    API.getCategoryByType(event.target.value)
+      .then((response) => {
+        const { data } = response;
+        const ListCategory = [];
+        data.data.forEach((item, index) => {
+          ListCategory.push({ label: item.name, value: item._id });
+        });
+        setOptionCategory(ListCategory);
+      })
+      .catch((e) => { });
+  };
+  // change description in form
+  const onChangeDescription = (event) => {
+    setDescription(event.target.value);
+    setNewProduct({ ...newProduct, [event.target.name]: event.target.value });
+  };
+  // change data in form (price,name)
+  const onChange = (event) => {
+    setNewProduct({ ...newProduct, [event.target.name]: event.target.value });
+  };
+  // change avatar in form
+  const onChangeAvatar = (event) => {
+    setNewProduct({ ...newProduct, [event.target.name]: event.target.files[0] });
+    setAvatar(URL.createObjectURL(event.target.files[0]));
+  };
+  // change category in form
+  const handleChangeCategory = (event) => {
+    setCategoryId(event.target.value);
+    setNewProduct({ ...newProduct, [event.target.name]: event.target.value });
+  };
+  // disable select category if do not select type product
+  if (typeId !== '') {
+    disabled = false;
+  }
   useEffect(() => {
+    getTypeProducts();
     getProductData();
-  }, []);
+  }, [rowsPerPage, page]);
   return (
     <div className="container">
-      <BreadCrumb />
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable={false}
+        pauseOnHover={false}
+      />
+      <BreadCrumb name="Quản lý sản phẩm" />
       <div className={classes.root}>
         <Grid container spacing={3}>
-          <Grid item xs={9} sm={9}>
+          <Grid item xs={8} sm={9} className="content">
             <div className="header-left">
               <h5>Danh sách sản phẩm</h5>
             </div>
@@ -228,60 +398,52 @@ const ProductManagement = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell>STT</TableCell>
-                      <TableCell>Product name</TableCell>
-                      <TableCell>Product code</TableCell>
-                      <TableCell align="center">Category</TableCell>
-                      <TableCell align="center">Price</TableCell>
-                      <TableCell align="center">Action</TableCell>
+                      <TableCell>Tên sản phẩm</TableCell>
+                      <TableCell>Mã sản phẩm</TableCell>
+                      <TableCell>Danh mục</TableCell>
+                      <TableCell align="center">Giá</TableCell>
+                      <TableCell align="center">Thao tác</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {(rowsPerPage > 0
-                      ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      : rows
-                    ).map((row, index) => (
-                      // eslint-disable-next-line no-underscore-dangle
-                      <TableRow key={row._id}>
+                    {products && products.map((productItem, index) => (
+                      <TableRow key={productItem._id}>
                         <TableCell align="center">
                           {index + 1}
                         </TableCell>
                         <TableCell>
-                          {row.productName}
+                          {productItem.productName}
                         </TableCell>
                         <TableCell>
-                          {row.productCode}
+                          {productItem.productCode}
+                        </TableCell>
+                        <TableCell>
+                          {productItem.categoryId.name}
                         </TableCell>
                         <TableCell align="right">
-                          {row.categoryId}
-                        </TableCell>
-                        <TableCell align="right">
-                          {row.price}
+                          {productItem.price}
                         </TableCell>
                         <TableCell align="center">
-                          <IconButton color="primary" aria-label="detail" onClick={() => updateProduct(row._id)}>
+                          <IconButton color="primary" className="button-table" aria-label="detail" onClick={() => updateProduct(productItem._id)}>
                             <EditIcon />
                           </IconButton>
-                          <IconButton color="secondary" aria-label="delete" onClick={() => deleteProduct(row._id)}>
+                          <IconButton color="secondary" className="button-table" aria-label="delete" onClick={() => deleteProduct(productItem._id)}>
                             <DeleteIcon />
                           </IconButton>
                         </TableCell>
                       </TableRow>
                     ))}
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 53 * emptyRows }}>
-                        <TableCell colSpan={6} />
-                      </TableRow>
-                    )}
                   </TableBody>
                   <TableFooter>
                     <TableRow>
                       <TablePagination
-                        rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                        rowsPerPageOptions={[5, 10, 25, { label: 'All', value: totalItem }]}
                         colSpan={6}
-                        count={rows.length}
+                        count={totalItem}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         SelectProps={{
+                          key: 5,
                           inputProps: { 'aria-label': 'rows per page' },
                           native: true,
                         }}
@@ -295,7 +457,7 @@ const ProductManagement = () => {
               </TableContainer>
             </div>
           </Grid>
-          <Grid item xs={3} sm={3}>
+          <Grid item xs={4} sm={3} className="content">
             <div className="header-right">
               <h5>Thêm sản phẩm</h5>
               <Formik
@@ -303,70 +465,94 @@ const ProductManagement = () => {
                 validationSchema={validationSchema}
                 onSubmit={onSubmit}
               >
-                {({ isValid }) => (
+                {({ isValid, values }) => (
                   <Form autoComplete="off">
                     <FormikTextField
                       name="productName"
-                      label="Product Name"
+                      label="Tên sản phẩm"
                       margin="normal"
                       fullWidth
+                      onChange={onChange}
                     />
                     <Grid container spacing={3}>
                       <Grid item xs={6} className="select-type">
                         <FormikSelectField
                           name="typeId"
-                          label="Type"
+                          label="Loại"
                           margin="normal"
-                          options={[
-                            { label: 'Male', value: 'male' },
-                            { label: 'Female', value: 'female' },
-                          ]}
+                          options={optionType}
+                          onChange={handleChangeType}
+                          key={optionType.value}
                           fullWidth
                         />
                       </Grid>
                       <Grid item xs={6} className="select-category">
                         <FormikSelectField
+                          key={optionCategory.value}
                           name="categoryId"
-                          label="Category"
+                          label="Danh mục"
                           margin="normal"
-                          options={[
-                            { label: 'Male', value: 'male' },
-                            { label: 'Female', value: 'female' },
-                          ]}
+                          onChange={handleChangeCategory}
+                          options={optionCategory}
                           fullWidth
+                          disabled={disabled}
                         />
                       </Grid>
                     </Grid>
                     <FormikTextField
                       name="price"
-                      label="Price"
+                      label="Giá"
                       margin="normal"
+                      onChange={onChange}
                       fullWidth
                     />
                     <MyTextArea
-                      label="Description"
+                      label="Mô tả"
                       name="description"
                       rows="6"
-                      placeholder="Please enter description..."
+                      value={description}
+                      onChange={onChangeDescription}
+                      placeholder="Nhập mô tả..."
                     />
-                    <div className="upload">
-                      <img src="" alt="" />
-                      <input type="file" name="" id="upload" />
-                      <label className="label-upload" htmlFor="upload">
-                        <IconButton color="primary" aria-label="upload picture" component="span">
-                          <PhotoCamera />
+                    <div style={styleDivUpload} className="upload upload-avatar add-avatar">
+                      <img style={style} className="image-avatar image-avatar-upload" src={avatar && avatar} alt="" />
+                      <label style={styleButtonImage} className="label-upload label-upload-avatar label-add-avatar" htmlFor="upload">
+                        <IconButton className="btn-change btn-add" color="primary" aria-label="upload picture" component="span">
+                          <InsertPhotoOutlinedIcon />
                         </IconButton>
                       </label>
+                      <div className="label-upload view-image" style={style}>
+                        <IconButton className="btn-view" color="primary" aria-label="upload picture" component="span" onClick={() => view()}>
+                          <VisibilityOutlinedIcon />
+                        </IconButton>
+                      </div>
                     </div>
-                    <Button color="primary" variant="contained" fullWidth type="submit">
-                      Add
-                    </Button>
+                    <FormikTextField
+                      name="file"
+                      type="file"
+                      id="upload"
+                      accept="image/png, image/jpg, image/jpeg"
+                      onChange={onChangeAvatar}
+                    />
+                    <div className="button">
+                      <Button className="btn-submit" color="primary" variant="contained" type="submit">
+                        Thêm
+                      </Button>
+                      <Button className="btn-submit" color="secondary" variant="contained" onClick={() => clearForm()}>
+                        Đặt lại
+                      </Button>
+                    </div>
                   </Form>
                 )}
               </Formik>
             </div>
           </Grid>
         </Grid>
+      </div>
+      <div style={viewImage ? null : { display: 'none' }} className="modal-view-image">
+        {/* eslint-disable-next-line react/button-has-type */}
+        <button className="close" onClick={() => exit()}>&times; </button>
+        <img src={avatar && avatar} alt="" className="modal-view-image-content" />
       </div>
     </div>
   );

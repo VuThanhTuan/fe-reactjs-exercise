@@ -1,8 +1,18 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable arrow-body-style */
 import http from '../utils/http-common';
 
-const getAll = () => {
-  return http.get('/product');
+const getAll = (page, PAGE_SIZE) => {
+  return http.get(`/product?page=${page}&PAGE_SIZE=${PAGE_SIZE}`);
+};
+
+const getAllProductSearch = (typeId, categoryId, keywords, page, PAGE_SIZE) => {
+  return http.get(`/product?typeId=${typeId}&categoryId=${categoryId}&keywords=${keywords}&page=${page}&PAGE_SIZE=${PAGE_SIZE}`);
+};
+
+const createNewProduct = (data) => {
+  return http.post('/product', data);
 };
 
 const getByProductId = (id) => {
@@ -13,8 +23,8 @@ const deleteProduct = (id) => {
   return http.delete(`/product/${id}`);
 };
 
-const updateProduct = (id) => {
-  return http.put(`/product/${id}`);
+const updateProduct = (id, data) => {
+  return http.put(`/product/${id}`, data);
 };
 
 const getProductByCategory = (categoryId) => {
@@ -47,4 +57,6 @@ export default {
   getAllType,
   getAllCategory,
   getCategoryByType,
+  getAllProductSearch,
+  createNewProduct,
 };

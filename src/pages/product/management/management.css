@@ -1,15 +1,52 @@
-.header-left h5,
-.header-right h5 {
+.header-left h5, .header-right h5 {
   margin-block-start: 0em !important;
   margin-block-end: 0em !important;
 }
+
 .table {
-  margin-top: 63px;
+  margin-top: 25px;
+}
+
+.MuiPaper-elevation1 {
+  box-shadow: none!important;
+}
+
+.Toastify__toast-body {
+  font-size: 16px;
+}
+
+.swal2-title {
+  font-size: 1.1em!important;
 }
 .MuiTableContainer-root {
-  border: 1px solid rgba(224, 224, 224, 1) !important;
+  border: none!important;
+}
+
+@media (min-width: 600px) {
+  .MuiGrid-grid-sm-3 {
+    flex-grow: 0;
+    max-width: 31.333333%!important;
+    flex-basis: 33.333333%;
+    margin-left: 40px!important;
+    border-radius:5px;
+  }
+  .MuiGrid-grid-sm-9 {
+    flex-grow: 0;
+    max-width: 70%!important;
+    flex-basis: 75%;
+    border-radius:5px;
+  }
+}
+
+.MuiTablePagination-root:last-child {
+  padding-right: 24px!important;
+}
+
+.button-table:hover{
+  background: #fafafa!important;
 }
 /* css for form */
+
 textarea {
   width: 100%;
   /* margin-top: 20px; */
@@ -50,13 +87,12 @@ textarea:invalid {
   border: 2px solid #3f51b5;
   pointer-events: none;
 }
-.text-area-label{
-  /* position:absolute; */
-  top:-1px;
-  left:0;
-  background-color:white;
+
+.text-area-label {
+  top: -1px;
+  left: 0;
+  background-color: white;
   font-size: 1rem;
-  /* color: rgb(133, 133, 133); */
   color: rgba(0, 0, 0, 0.54);
   padding: 0;
   font-size: 1rem;
@@ -65,6 +101,7 @@ textarea:invalid {
   line-height: 1;
   letter-spacing: 0.00938em;
 }
+
 .label-upload {
   color: white;
   font-family: sans-serif;
@@ -72,20 +109,76 @@ textarea:invalid {
   cursor: pointer;
   margin-top: 1rem;
 }
+
 #upload {
   display: none;
 }
+
 .upload {
-  width: 200px;
-  height: 200px;
+  width: 100%;
   border: 1px dashed grey;
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 99;
 }
+
 .select-type {
   padding-left: 0 !important;
 }
+
 .select-category {
   padding-right: 0 !important;
+}
+
+#upload-helper-text {
+  position: absolute;
+  inline-size: max-content;
+}
+
+.upload .MuiInput-underline:before {
+  left: inherit!important;
+  content: ""!important;
+}
+
+.upload .MuiInput-underline:after {
+  border-bottom: none!important;
+}
+
+.btn-add {
+  color: black!important;
+}
+
+.add-avatar {
+  background-color: rgba(179, 176, 176, 0.7);
+}
+
+.button {
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn-submit {
+  width: 100px;
+}
+
+.add-avatar {
+  width: 100%;
+}
+
+.add-avatar:before {
+  content: "";
+  padding-top: 100%;
+}
+
+.image-avatar-upload {
+  width: 240px!important;
+  height: 240px!important;
+  position: absolute;
+  border-radius: 0!important;
+  border: 1px solid grey!important;
+}
+
+.modal-view-image {
+  transition: all 0.2s ease;
 }

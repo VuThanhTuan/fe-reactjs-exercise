@@ -14,6 +14,7 @@ import Home from './pages/product/home/Home';
 import Management from './pages/product/management/management';
 import ProductDetail from './pages/product/detail/detail';
 import UpdateProduct from './pages/product/update/update';
+import NotFound from './components/NotFound/NotFound';
 import Loading from './components/loading/loading';
 
 // const ProductDetail = lazy(
@@ -35,8 +36,9 @@ class App extends Component {
                 {/* <Route exact path={path.path.HOME} component={Home} /> */}
                 <Route exact path={[path.HOME, '/']} component={Home} />
                 <Route exact path={path.PRODUCT} component={Management} />
-                <Route path={path.DETAIL} component={ProductDetail} />
+                <Route path={`${path.DETAIL}/:id`} component={ProductDetail} />
                 <Route path={path.UPDATE} component={UpdateProduct} />
+                <Route exact path={path.NOTFOUND} component={NotFound} />
               </Switch>
             </div>
           </div>

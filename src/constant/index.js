@@ -1,6 +1,7 @@
 export default {
   HOME: '/home',
   PRODUCT: '/product',
-  DETAIL: '/home/:id',
+  DETAIL: '/home',
   UPDATE: '/product/:id',
+  NOTFOUND: '/notfound',
 };

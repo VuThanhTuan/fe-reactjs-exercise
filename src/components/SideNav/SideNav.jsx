@@ -8,7 +8,7 @@ class SideBar extends Component {
     return (
       <div className="sidebar">
         <ul>
-          <li>
+          <li className="top">
             <NavLink to="/home">
               <span>Sản phẩm</span>
             </NavLink>
